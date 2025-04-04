@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,15 +8,15 @@ datasource db {
 }
 
 model Account {
-  id        String   @id @default(uuid())
-  name      String
-  type      AccountType
-  users     UserAccount[]
-  budgets   Budget[]
-  debts     Debt[]
+  id           String        @id @default(uuid())
+  name         String
+  type         AccountType
+  users        UserAccount[] @relation(name: "UserAccounts")
+  budgets      Budget[]
+  debts        Debt[]
   transactions Transaction[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }
 
 enum AccountType {
@@ -31,70 +25,75 @@ enum AccountType {
 }
 
 model User {
-  id        String         @id @default(uuid())
-  name      String
-  email     String         @unique
-  password  String
-  role      UserRole @default(USER) // Add this line
-  accounts  UserAccount[]
+  id              String        @id @default(uuid())
+  name            String
+  email           String        @unique
+  password        String
+  role            UserRole      @default(USER)
+  accounts        UserAccount[] @relation(name: "UserAccounts")
   personalBudgets Budget[]
   personalDebts   Debt[]
-  transactions Transaction[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  transactions    Transaction[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 }
 
 model UserAccount {
   userId    String
   accountId String
-  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  role      AccountRole
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade, name: "UserAccounts")
+  account   Account     @relation(fields: [accountId], references: [id], onDelete: Cascade, name: "UserAccounts")
+  role      AccountRole @default(MEMBER)
+
   @@id([userId, accountId])
 }
 
 model Budget {
-  id         String   @id @default(uuid())
-  name       String
-  amount     Float
-  userId     String?  // Null if shared budget
-  accountId  String?  // Null if personal budget
-  user       User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  account    Account? @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  createdAt  DateTime @default(now())
+  id        String   @id @default(uuid())
+  name      String
+  amount    Float
+  userId    String?
+  accountId String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account   Account? @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Debt {
-  id         String   @id @default(uuid())
+  id          String     @id @default(uuid())
   description String
-  amount     Float
-  userId     String?  // Null if shared debt
-  accountId  String?  // Null if personal debt
-  user       User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  account    Account? @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  status     DebtStatus @default(PENDING)
-  createdAt  DateTime @default(now())
+  amount      Float
+  userId      String?
+  accountId   String?
+  user        User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account     Account?   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  status      DebtStatus @default(PENDING)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 }
 
 model Transaction {
-  id        String   @id @default(uuid())
-  amount    Float
-  type      TransactionType
-  date      DateTime @default(now())
-  accountId String
-  account   Account  @relation(fields: [accountId], references: [id])
-  userId    String?
-  user      User?    @relation(fields: [userId], references: [id])
+  id         String          @id @default(uuid())
+  amount     Float
+  type       TransactionType
+  date       DateTime        @default(now())
+  accountId  String
+  account    Account         @relation(fields: [accountId], references: [id])
+  userId     String?
+  user       User?           @relation(fields: [userId], references: [id])
   categoryId String?
-  category   Category? @relation(fields: [categoryId], references: [id])
-  createdAt DateTime @default(now())
+  category   Category?       @relation(fields: [categoryId], references: [id])
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
 }
 
 model Category {
-  id          String   @id @default(uuid())
-  name        String
+  id           String        @id @default(uuid())
+  name         String
   transactions Transaction[]
-  createdAt   DateTime @default(now())
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }
 
 enum TransactionType {
