@@ -6,27 +6,17 @@ interface ResponseData<T> {
   data?: T;
 }
 
-export const successResponse = <T>(
+export const sendResponse = <T>(
   res: Response,
-  data: T,
-  message: string = "Request successful"
+  success: boolean,
+  message: string,
+  data?: T,
+  statusCode: number = success ? 200 : 400
 ) => {
-  const response: ResponseData<T> = {
-    success: true,
+  const response: ResponseData<T | null> = {
+    success,
     message,
-    data,
-  };
-  res.status(200).json(response);
-};
-
-export const errorResponse = (
-  res: Response,
-  message: string = "An error occurred",
-  statusCode: number = 400
-) => {
-  const response: ResponseData<null> = {
-    success: false,
-    message,
+    data: success ? data : null,
   };
   res.status(statusCode).json(response);
 };
