@@ -4,6 +4,8 @@ import {
   getAccountById,
   createAccount,
 } from "../controllers/accountController";
+import { verifyToken } from "../middlewares/verifyToken";
+import { authorizeRoles } from "../middlewares/authorizeRoles";
 
 const router = Router();
 
@@ -11,7 +13,8 @@ const router = Router();
  * @swagger
  * /accounts:
  *   get:
- *     summary: Get all accounts
+ *     summary: Get all accounts (Admin only)
+ *     description: This route requires authentication and the "ADMIN" role.
  *     tags: [Accounts]
  *     responses:
  *       200:
@@ -20,13 +23,14 @@ const router = Router();
  *       500:
  *         description: Server error
  */
-router.get("/", getAccounts);
+router.get("/", verifyToken, authorizeRoles("ADMIN"), getAccounts);
 
 /**
  * @swagger
  * /accounts/{id}:
  *   get:
- *     summary: Get account by ID
+ *     summary: Get account by ID (Admin and User only)
+ *     description: This route requires authentication and the "ADMIN" role or the "USER" role with strict access.
  *     tags: [Accounts]
  *     parameters:
  *       - name: id
@@ -41,13 +45,19 @@ router.get("/", getAccounts);
  *       404:
  *         description: Account not found
  */
-router.get("/:id", getAccountById);
+router.get(
+  "/:id",
+  verifyToken,
+  authorizeRoles("ADMIN", { USER: { strict: true } }),
+  getAccountById
+);
 
 /**
  * @swagger
  * /accounts/create:
  *   post:
- *     summary: Create a new account
+ *     summary: Create a new Finance account
+ *     description: This route requires authentication.
  *     tags: [Accounts]
  *     requestBody:
  *       required: true
@@ -67,6 +77,6 @@ router.get("/:id", getAccountById);
  *       400:
  *         description: Bad request
  */
-router.post("/create", createAccount);
+router.post("/create", verifyToken, createAccount);
 
 export default router;
