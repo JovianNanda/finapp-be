@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import prisma from "../models/prismaClient";
-import { errorResponse, successResponse } from "../utils/responseHelper";
-import bcrypt from "bcrypt"; // Import bcrypt for password hashing
+import { sendResponse } from "../utils/responseHelper";
 import { IUser } from "../types/userTypes";
 
 export const getUsers = async (req: Request, res: Response) => {
@@ -15,9 +14,9 @@ export const getUsers = async (req: Request, res: Response) => {
         updatedAt: true,
       },
     });
-    successResponse(res, users, "Users fetched successfully");
+    sendResponse(res, true, "Users fetched successfully", users);
   } catch (error) {
-    errorResponse(res, "Failed to fetch users", 500);
+    sendResponse(res, false, "Failed to fetch users", null, 500);
   }
 };
 
@@ -35,10 +34,36 @@ export const getUserById = async (req: Request, res: Response) => {
       where: { id },
     });
     if (!user) {
-      return errorResponse(res, "User not found", 404);
+      return sendResponse(res, false, "User not found", null, 404);
     }
-    successResponse(res, user, "User fetched successfully");
+    sendResponse(res, true, "User fetched successfully", user);
   } catch (error) {
-    errorResponse(res, "Failed to fetch user", 500);
+    sendResponse(res, false, "Failed to fetch user", null, 500);
+  }
+};
+
+export const getUserWithAccounts = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    const userWithAccounts = await prisma.user.findUnique({
+      where: { id },
+      include: {
+        accounts: {
+          include: {
+            account: true, // Fetch full account details
+          },
+        },
+      },
+    });
+
+    sendResponse(
+      res,
+      true,
+      "User with accounts fetched successfully",
+      userWithAccounts
+    );
+  } catch (error) {
+    sendResponse(res, false, "Failed to fetch user with accounts", null, 500);
   }
 };
