@@ -1,6 +1,6 @@
-export type AccountType = "PERSONAL" | "SHARED";
+import { AccountType } from "@prisma/client";
 
-export interface Account {
+export interface IAccount {
   id: string;
   name: string;
   type: AccountType;
