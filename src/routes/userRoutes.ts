@@ -1,5 +1,9 @@
 import { Router } from "express";
-import { getUsers, getUserById } from "../controllers/userController";
+import {
+  getUsers,
+  getUserById,
+  getUserWithAccounts,
+} from "../controllers/userController";
 import { verifyToken } from "../middlewares/verifyToken";
 import { authorizeRoles } from "../middlewares/authorizeRoles";
 
@@ -58,4 +62,55 @@ router.get(
   getUserById
 );
 
+/**
+ * @swagger
+ * /users/{id}/accounts:
+ *   get:
+ *     summary: Get accounts of a user by ID (Admin and User only)
+ *     description: Retrieve the accounts associated with a specific user. This route requires authentication and either the "ADMIN" role or the "USER" role with strict access.
+ *     security:
+ *       - bearerAuth: []
+ *     tags:
+ *       - Users
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: The ID of the user whose accounts are to be retrieved.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved user accounts.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   accountId:
+ *                     type: string
+ *                     description: The unique ID of the account.
+ *                   accountType:
+ *                     type: string
+ *                     description: The type of the account (e.g., savings, checking).
+ *                   balance:
+ *                     type: number
+ *                     description: The current balance of the account.
+ *       401:
+ *         description: Unauthorized - User must be authenticated.
+ *       403:
+ *         description: Forbidden - User does not have the required role or strict access denied.
+ *       500:
+ *         description: Internal server error.
+ */
+router.get(
+  "/:id/accounts",
+  verifyToken,
+  authorizeRoles("ADMIN", { USER: { strict: true } }),
+  (req, res) => {
+    getUserWithAccounts(req, res);
+  }
+);
 export default router;
