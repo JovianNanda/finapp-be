@@ -15,14 +15,14 @@ FinApp Backend is a financial management API built with **Express.js**, **Prisma
 - **Backend**: Node.js, Express.js
 - **Database**: PostgreSQL/MySQL (via Prisma ORM)
 - **Authentication**: JWT, Refresh Token
-- **Deployment**: VPS / Railway / Vercel
+- **Deployment**: VPS
 
 ## 🔧 Installation
 
 ### 1️⃣ Clone the repository
 
 ```sh
-git clone https://github.com/yourusername/finapp-backend.git
+git clone https://github.com/JovianNanda/finapp-backend.git
 cd finapp-backend
 ```
 
