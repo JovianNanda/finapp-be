@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
-import bcrypt from "bcryptjs";
 import prisma from "../models/prismaClient";
-import { Account } from "../types/accountTypes";
-import { successResponse, errorResponse } from "../utils/responseHelper";
+import { IAccount } from "../types/accountTypes";
+import { sendResponse } from "../utils/responseHelper";
+import { AuthRequest } from "../types/authTypes";
 
 export const getAccounts = async (req: Request, res: Response) => {
   try {
-    const accounts: Account[] = await prisma.account.findMany({
+    const accounts: IAccount[] = await prisma.account.findMany({
       select: {
         id: true,
         name: true,
@@ -15,16 +15,16 @@ export const getAccounts = async (req: Request, res: Response) => {
         updatedAt: true,
       },
     });
-    successResponse(res, accounts, "Accounts fetched successfully");
+    sendResponse(res, true, "Accounts fetched successfully", accounts);
   } catch (error) {
-    errorResponse(res, "Failed to fetch users", 500);
+    sendResponse(res, false, "Failed to fetch accounts", null, 500);
   }
 };
 
 export const getAccountById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const account: Account | null = await prisma.account.findUnique({
+    const account: IAccount | null = await prisma.account.findUnique({
       where: { id },
       select: {
         id: true,
@@ -35,24 +35,50 @@ export const getAccountById = async (req: Request, res: Response) => {
       },
     });
 
-    if (!account) res.status(404).json({ message: "Account not found" });
-    res.json(account);
+    if (!account) sendResponse(res, false, "Account not found", null, 404);
+    sendResponse(res, true, "Account fetched successfully", account);
   } catch (error) {
-    res.status(500).json({ message: "Server error", error });
+    sendResponse(res, false, "Failed to fetch account", null, 500);
   }
 };
 
-export const createAccount = async (req: Request, res: Response) => {
+export const createAccount = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
+  if (!req.user?.id) {
+    sendResponse(res, false, "Unauthorized", null, 401);
+    return;
+  }
   try {
     const { name, type } = req.body;
-    const newAccount: Account = await prisma.account.create({
+    const newAccount: IAccount = await prisma.account.create({
       data: {
         name,
         type,
       },
     });
-    successResponse(res, newAccount, "Account created successfully");
+    if (newAccount) {
+      const userAccountRelation = await prisma.userAccount.create({
+        data: {
+          userId: req.user.id,
+          accountId: newAccount.id,
+          role: "OWNER", // create account must be owner, there wil be different for shared accounts or joining accounts
+        },
+      });
+      if (!userAccountRelation) {
+        return sendResponse(
+          res,
+          false,
+          "Failed to create user-account relation",
+          null,
+          500
+        );
+      }
+    }
+
+    sendResponse(res, true, "Account created successfully", newAccount, 201);
   } catch (error) {
-    errorResponse(res, "Failed to create account", 500);
+    sendResponse(res, false, "Failed to create account", null, 500);
   }
 };
