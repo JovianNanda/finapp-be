@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import jwt, { VerifyErrors, JwtPayload } from "jsonwebtoken";
+import { sendResponse } from "../utils/responseHelper";
 
 const prisma = new PrismaClient();
 
@@ -42,7 +43,7 @@ export const register = async (
     const { email, password, name } = req.body;
 
     if (!email || !password || !name) {
-      res.status(400).json({ message: "All fields are required" });
+      sendResponse(res, false, "All fields are required", null, 400);
       return;
     }
 
@@ -55,7 +56,7 @@ export const register = async (
       },
     });
 
-    res.status(201).json({ message: "User registered successfully", user });
+    sendResponse(res, true, "User registered successfully", user);
   } catch (error) {
     next(error);
   }
@@ -69,13 +70,13 @@ export const login = async (
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      res.status(400).json({ message: "Email and password are required" });
+      sendResponse(res, false, "Email and password are required", null, 400);
       return;
     }
 
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user || !(await bcrypt.compare(password, user.password))) {
-      res.status(401).json({ message: "Invalid credentials" });
+      sendResponse(res, false, "Invalid credentials", null, 401);
       return;
     }
 
@@ -95,7 +96,11 @@ export const login = async (
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.json({ message: "Login successful", accessToken, refreshToken });
+    const data = {
+      accessToken,
+      refreshToken,
+    };
+    sendResponse(res, true, "Login successful", data);
   } catch (error) {
     next(error);
   }
@@ -110,7 +115,7 @@ export const refreshToken = async (
     const refreshToken = req.cookies.refresh_token;
 
     if (!refreshToken) {
-      res.status(401).json({ message: "Unauthorized: No refresh token" });
+      sendResponse(res, false, "No refresh token provided", null, 401);
       return;
     }
 
@@ -122,7 +127,7 @@ export const refreshToken = async (
         decoded: JwtPayload | string | undefined
       ) => {
         if (err || !decoded || typeof decoded === "string") {
-          res.status(403).json({ message: "Invalid refresh token" });
+          sendResponse(res, false, "Invalid refresh token", null, 403);
           return;
         }
 
@@ -131,7 +136,7 @@ export const refreshToken = async (
         });
 
         if (!user) {
-          res.status(403).json({ message: "User not found" });
+          sendResponse(res, false, "User not found", null, 403);
           return;
         }
 
@@ -147,7 +152,13 @@ export const refreshToken = async (
           sameSite: "strict",
           maxAge: 15 * 60 * 1000,
         });
-        res.json({ message: "Token refreshed", accessToken: newAccessToken });
+        sendResponse(
+          res,
+          true,
+          "Token refreshed successfully",
+          { accessToken: newAccessToken },
+          200
+        );
       }
     );
   } catch (error) {
@@ -157,5 +168,5 @@ export const refreshToken = async (
 export const logout = (req: Request, res: Response) => {
   res.clearCookie("access_token");
   res.clearCookie("refresh_token");
-  res.json({ message: "Logged out successfully" });
+  sendResponse(res, true, "Logged out successfully", null, 200);
 };
