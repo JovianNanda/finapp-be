@@ -4,7 +4,6 @@ import prisma from "../models/prismaClient";
 import { Account } from "../types/accountTypes";
 import { successResponse, errorResponse } from "../utils/responseHelper";
 
-// Get all accounts (ADMIN only)
 export const getAccounts = async (req: Request, res: Response) => {
   try {
     const accounts: Account[] = await prisma.account.findMany({
@@ -22,7 +21,6 @@ export const getAccounts = async (req: Request, res: Response) => {
   }
 };
 
-// Get a single account by ID (Admin or the account owner)
 export const getAccountById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;

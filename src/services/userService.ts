@@ -1,5 +1,5 @@
-import prisma from "../models/prismaClient"; // Import your database connection
-import { IUser } from "../types/userTypes"; // Import your User type
+import prisma from "../models/prismaClient";
+import { IUser } from "../types/userTypes";
 
 export const getUserById = async (id: string): Promise<IUser | null> => {
   const user = await prisma.user.findUnique({

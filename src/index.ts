@@ -26,9 +26,9 @@ app.get("/api", (req: Request, res: Response) => {
 });
 app.use("/api/users", userRoutes);
 app.use("/api/accounts", accountRoutes);
-app.use("/api/auth", authRoutes); // Assuming auth routes are in userRoutes
+app.use("/api/auth", authRoutes);
 
-// Setup Swagger
+// Setup Swagger API documentation
 setupSwagger(app);
 
 app.listen(PORT, () => {

@@ -66,7 +66,7 @@ router.post("/register", register); // Register a new user
  *                 example: johndoe@example.com
  *               password:
  *                 type: string
- *                 example: Password123!
+ *                 example: securepassword
  *     responses:
  *       200:
  *         description: Login successful
