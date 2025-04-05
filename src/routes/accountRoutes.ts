@@ -4,6 +4,7 @@ import {
   getAccountById,
   createAccount,
   updateAccount,
+  deleteAccount,
 } from "../controllers/accountController";
 import { verifyToken } from "../middlewares/verifyToken";
 import { authorizeRoles } from "../middlewares/authorizeRoles";
@@ -121,6 +122,35 @@ router.patch(
   verifyToken,
   authorizeRoles("ADMIN", "USER"),
   updateAccount
+);
+
+/**
+ * @swagger
+ * /accounts/delete/{id}:
+ *   delete:
+ *     summary: Delete an existing Finance account
+ *     description: This route requires authentication.
+ *     tags: [Accounts]
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: The ID of the account to delete
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Account deleted successfully
+ *       404:
+ *         description: Account not found
+ *       500:
+ *         description: Server error
+ * */
+router.delete(
+  "/delete/:id",
+  verifyToken,
+  authorizeRoles("ADMIN", "USER"),
+  deleteAccount
 );
 
 export default router;

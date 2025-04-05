@@ -4,6 +4,7 @@ import { IAccount } from "../types/accountTypes";
 import { sendResponse } from "../utils/responseHelper";
 import { AuthRequest } from "../types/authTypes";
 import { checkAccountOwnership } from "../utils/checkAccountOwnership";
+import { Prisma } from "@prisma/client";
 
 export const getAccounts = async (req: Request, res: Response) => {
   try {
@@ -122,5 +123,45 @@ export const updateAccount = async (
     sendResponse(res, true, "Account updated successfully", updatedAccount);
   } catch (error) {
     sendResponse(res, false, "Failed to update account", null, 500);
+  }
+};
+
+export const deleteAccount = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
+  if (!req.user?.id) {
+    sendResponse(res, false, "Unauthorized", null, 401);
+    return;
+  }
+  const userId = req.user?.id;
+  const accountId = req.params.id;
+  if (req.user?.role === "USER") {
+    const isOwner = await checkAccountOwnership(accountId, userId);
+    if (!isOwner) {
+      return sendResponse(
+        res,
+        false,
+        "You do not have permission to delete this account",
+        null,
+        403
+      );
+    }
+  }
+  try {
+    const deletedAccount: IAccount = await prisma.account.delete({
+      where: { id: accountId },
+    });
+
+    sendResponse(res, true, "Account deleted successfully", deletedAccount);
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
+      return sendResponse(res, false, "Account not found", null, 404);
+    }
+
+    sendResponse(res, false, "Failed to delete account", null, 500);
   }
 };
