@@ -66,8 +66,8 @@ router.get(
  * @swagger
  * /users/{id}/accounts:
  *   get:
- *     summary: Get accounts of a user by ID (Admin and User only)
- *     description: Retrieve the accounts associated with a specific user. This route requires authentication and either the "ADMIN" role or the "USER" role with strict access.
+ *     summary: Get a user with their accounts (Admin and User only)
+ *     description: This route requires authentication and the "ADMIN" role or the "USER" role with strict access.
  *     security:
  *       - bearerAuth: []
  *     tags:
@@ -76,34 +76,16 @@ router.get(
  *       - name: id
  *         in: path
  *         required: true
- *         description: The ID of the user whose accounts are to be retrieved.
+ *         description: The ID of the user whose accounts are to be retrieved
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: Successfully retrieved user accounts.
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   accountId:
- *                     type: string
- *                     description: The unique ID of the account.
- *                   accountType:
- *                     type: string
- *                     description: The type of the account (e.g., savings, checking).
- *                   balance:
- *                     type: number
- *                     description: The current balance of the account.
+ *         description: Successfully retrieved user with accounts
  *       401:
- *         description: Unauthorized - User must be authenticated.
+ *         description: Unauthorized - User must be authenticated
  *       403:
- *         description: Forbidden - User does not have the required role or strict access denied.
- *       500:
- *         description: Internal server error.
+ *         description: Forbidden - User does not have the required role or strict access denied
  */
 router.get(
   "/:id/accounts",
