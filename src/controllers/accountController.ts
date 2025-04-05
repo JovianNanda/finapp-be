@@ -97,7 +97,7 @@ export const updateAccount = async (
   if (req.user?.role === "USER") {
     const isOwner = await checkAccountOwnership(accountId, userId);
     if (!isOwner) {
-      sendResponse(
+      return sendResponse(
         res,
         false,
         "You do not have permission to update this account",
