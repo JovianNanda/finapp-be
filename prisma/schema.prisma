@@ -17,6 +17,7 @@ model Account {
   transactions Transaction[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+  Invitations  Invitation[]
 }
 
 enum AccountType {
@@ -25,17 +26,19 @@ enum AccountType {
 }
 
 model User {
-  id              String        @id @default(uuid())
-  name            String
-  email           String        @unique
-  password        String
-  role            UserRole      @default(USER)
-  accounts        UserAccount[] @relation(name: "UserAccounts")
-  personalBudgets Budget[]
-  personalDebts   Debt[]
-  transactions    Transaction[]
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id                  String        @id @default(uuid())
+  name                String
+  email               String        @unique
+  password            String
+  role                UserRole      @default(USER)
+  accounts            UserAccount[] @relation(name: "UserAccounts")
+  personalBudgets     Budget[]
+  personalDebts       Debt[]
+  transactions        Transaction[]
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  sentInvitations     Invitation[]  @relation("InviterRelation")
+  receivedInvitations Invitation[]  @relation("InviteeRelation")
 }
 
 model UserAccount {
@@ -94,6 +97,28 @@ model Category {
   transactions Transaction[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+}
+
+model Invitation {
+  id        String       @id @default(uuid())
+  email     String
+  inviteeId String?
+  invitee   User?        @relation(name: "InviteeRelation", fields: [inviteeId], references: [id])
+  inviterId String
+  inviter   User         @relation(name: "InviterRelation", fields: [inviterId], references: [id])
+  accountId String
+  account   Account      @relation(fields: [accountId], references: [id])
+  role      AccountRole  @default(MEMBER)
+  status    InviteStatus @default(PENDING)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
 }
 
 enum TransactionType {
