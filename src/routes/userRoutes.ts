@@ -55,12 +55,7 @@ router.get("/", verifyToken, authorizeRoles("ADMIN"), getUsers);
  *       403:
  *         description: Forbidden - User does not have the required role or strict access denied
  */
-router.get(
-  "/:id",
-  verifyToken,
-  authorizeRoles("ADMIN", { USER: { strict: true } }),
-  getUserById
-);
+router.get("/:id", verifyToken, authorizeRoles("ADMIN", "USER"), getUserById);
 
 /**
  * @swagger
@@ -90,7 +85,7 @@ router.get(
 router.get(
   "/:id/accounts",
   verifyToken,
-  authorizeRoles("ADMIN", { USER: { strict: true } }),
+  authorizeRoles("ADMIN", "USER"),
   (req, res) => {
     getUserWithAccounts(req, res);
   }

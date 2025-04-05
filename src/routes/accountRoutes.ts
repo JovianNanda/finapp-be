@@ -3,6 +3,7 @@ import {
   getAccounts,
   getAccountById,
   createAccount,
+  updateAccount,
 } from "../controllers/accountController";
 import { verifyToken } from "../middlewares/verifyToken";
 import { authorizeRoles } from "../middlewares/authorizeRoles";
@@ -48,7 +49,7 @@ router.get("/", verifyToken, authorizeRoles("ADMIN"), getAccounts);
 router.get(
   "/:id",
   verifyToken,
-  authorizeRoles("ADMIN", { USER: { strict: true } }),
+  authorizeRoles("ADMIN", "USER"),
   getAccountById
 );
 
@@ -78,5 +79,48 @@ router.get(
  *         description: Bad request
  */
 router.post("/create", verifyToken, createAccount);
+
+/**
+ * @swagger
+ * /accounts/update/{id}:
+ *   patch:
+ *     summary: Update an existing Finance account
+ *     description: This route requires authentication.
+ *     tags: [Accounts]
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: The ID of the account to update
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               type:
+ *                 type: string
+ *                 enum: [PERSONAL | SHARED]
+ *     responses:
+ *       200:
+ *         description: Account updated successfully
+ *       400:
+ *        description: Bad request
+ *       404:
+ *        description: Account not found
+ *       500:
+ *        description: Server error
+ * */
+router.patch(
+  "/update/:id",
+  verifyToken,
+  authorizeRoles("ADMIN", "USER"),
+  updateAccount
+);
 
 export default router;
