@@ -148,9 +148,8 @@ export const deleteAccount = async (
     }
   }
   try {
-    const { id } = req.params;
     const deletedAccount: IAccount | null = await prisma.account.delete({
-      where: { id },
+      where: { id: accountId },
     });
     if (!deletedAccount) {
       return sendResponse(res, false, "Account not found", null, 404);

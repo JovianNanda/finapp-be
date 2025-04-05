@@ -143,8 +143,8 @@ router.patch(
  *         description: Account deleted successfully
  *       404:
  *         description: Account not found
- *      500:
- *        description: Server error
+ *       500:
+ *         description: Server error
  * */
 router.delete(
   "/delete/:id",
