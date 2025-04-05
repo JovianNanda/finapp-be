@@ -105,7 +105,7 @@ router.post("/create", verifyToken, createAccount);
  *                 type: string
  *               type:
  *                 type: string
- *                 enum: [PERSONAL | SHARED]
+ *                 enum: ["PERSONAL", "SHARED"]
  *     responses:
  *       200:
  *         description: Account updated successfully
