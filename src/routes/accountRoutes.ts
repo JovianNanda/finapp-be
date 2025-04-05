@@ -56,7 +56,7 @@ router.get(
 
 /**
  * @swagger
- * /accounts/create:
+ * /accounts:
  *   post:
  *     summary: Create a new Finance account
  *     description: This route requires authentication.
@@ -79,11 +79,11 @@ router.get(
  *       400:
  *         description: Bad request
  */
-router.post("/create", verifyToken, createAccount);
+router.post("/", verifyToken, createAccount);
 
 /**
  * @swagger
- * /accounts/update/{id}:
+ * /accounts/{id}:
  *   patch:
  *     summary: Update an existing Finance account
  *     description: This route requires authentication.
@@ -118,7 +118,7 @@ router.post("/create", verifyToken, createAccount);
  *        description: Server error
  * */
 router.patch(
-  "/update/:id",
+  "/:id",
   verifyToken,
   authorizeRoles("ADMIN", "USER"),
   updateAccount
@@ -126,7 +126,7 @@ router.patch(
 
 /**
  * @swagger
- * /accounts/delete/{id}:
+ * /accounts/{id}:
  *   delete:
  *     summary: Delete an existing Finance account
  *     description: This route requires authentication.
@@ -147,7 +147,7 @@ router.patch(
  *         description: Server error
  * */
 router.delete(
-  "/delete/:id",
+  "/:id",
   verifyToken,
   authorizeRoles("ADMIN", "USER"),
   deleteAccount
