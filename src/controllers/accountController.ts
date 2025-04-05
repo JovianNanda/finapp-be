@@ -4,6 +4,7 @@ import { IAccount } from "../types/accountTypes";
 import { sendResponse } from "../utils/responseHelper";
 import { AuthRequest } from "../types/authTypes";
 import { checkAccountOwnership } from "../utils/checkAccountOwnership";
+import { Prisma } from "@prisma/client";
 
 export const getAccounts = async (req: Request, res: Response) => {
   try {
@@ -148,14 +149,19 @@ export const deleteAccount = async (
     }
   }
   try {
-    const deletedAccount: IAccount | null = await prisma.account.delete({
+    const deletedAccount: IAccount = await prisma.account.delete({
       where: { id: accountId },
     });
-    if (!deletedAccount) {
-      return sendResponse(res, false, "Account not found", null, 404);
-    }
+
     sendResponse(res, true, "Account deleted successfully", deletedAccount);
   } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
+      return sendResponse(res, false, "Account not found", null, 404);
+    }
+
     sendResponse(res, false, "Failed to delete account", null, 500);
   }
 };
