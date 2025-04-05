@@ -7,7 +7,6 @@ export const authorizeRoles = (...roles: RoleConfig[]) => {
   return (req: AuthRequest, res: Response, next: NextFunction): void => {
     const userRole = req.user?.role;
     const userId = req.user?.id;
-    const paramId = req.params.id;
 
     const roleMap: Record<string, boolean> = roles.reduce((acc, role) => {
       if (typeof role === "string") acc[role] = false;
@@ -19,10 +18,6 @@ export const authorizeRoles = (...roles: RoleConfig[]) => {
     }, {} as Record<string, boolean>);
 
     if (userRole && roleMap[userRole] !== undefined) {
-      if (userRole === "USER" && roleMap[userRole] && userId !== paramId) {
-        res.status(403).json({ message: "Forbidden: Strict mode enforced." });
-        return;
-      }
       return next();
     }
 

@@ -9,8 +9,6 @@ import { verifyToken } from "../middlewares/verifyToken";
 
 const router = express.Router();
 
-// 📌 Public Routes
-
 /**
  * @swagger
  * tags:
@@ -108,7 +106,6 @@ router.post("/login", login); // Login and receive tokens
  */
 router.post("/refresh", refreshToken); // Refresh expired access token
 
-// 📌 Protected Route (Logout)
 router.post("/logout", verifyToken, logout); // Logout & clear cookies
 
 export default router;
